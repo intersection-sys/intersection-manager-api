@@ -1,0 +1,276 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// COMPANY MODELS
+model Company {
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  key            String  @unique
+  CNPJ           String  @unique
+  imageUrl       String?
+  additionalInfo String?
+
+  roles            Role[]
+  users            User[]
+  rawMaterials     RawMaterial[]
+  stocks           Stock[]
+  formulas         Formula[]
+  analysis         Analysis[]
+  productionOrders ProductionOrder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  username       String  @unique
+  password       String
+  accessKey      String
+  imageUrl       String?
+  additionalInfo String?
+
+  workedSteps Step[]
+
+  role   Role?   @relation(fields: [roleId], references: [id])
+  roleId String? @db.ObjectId
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String  @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Role {
+  id     String   @id @default(auto()) @map("_id") @db.ObjectId
+  name   String
+  access String[]
+
+  users User[]
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String  @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// PRODUCTION MODEL - RAW MATERIAL
+model RawMaterial {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  unit       String
+  quantity   Float?
+  stockLimit Float?
+
+  stocks         Stock[]
+  stockDestinies StockDestiny[]
+  components     Component[]
+  compositions   Composition[]
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String  @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Stock {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  cost           Float
+  batch          String
+  invoiceNumber  String
+  supplier       String
+  expirationDate DateTime
+
+  quantity  Float
+  used      Float
+  remaining Float
+
+  qualityTests QualityTest[]
+
+  rawMaterial     RawMaterial    @relation(fields: [rawMaterialId], references: [id], onDelete: Cascade)
+  rawMaterialId   String         @db.ObjectId
+  compositions    Composition[]  @relation(fields: [compositionsIds], references: [id])
+  compositionsIds String[]       @db.ObjectId
+  stockDestinies  StockDestiny[]
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String  @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+type QualityTest {
+  url      String
+  fileName String
+}
+
+model StockDestiny {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  quantity          Float
+  description       String
+  productionOrderId String?  @db.ObjectId
+  wasted            Boolean?
+
+  stock         Stock       @relation(fields: [stockId], references: [id])
+  stockId       String      @db.ObjectId
+  rawMaterial   RawMaterial @relation(fields: [rawMaterialId], references: [id])
+  rawMaterialId String      @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// PRODUCTION MODEL - FORMULA
+model Formula {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  shelfLife Float // Months
+
+  components Component[]
+  procedure  Procedure?
+
+  analysis    Analysis[] @relation(fields: [analysisIds], references: [id])
+  analysisIds String[]   @db.ObjectId
+
+  steps Step[]
+
+  company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId        String            @db.ObjectId
+  productionOrders ProductionOrder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Procedure {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  weighing   ProcedureStep
+  production ProcedureStep
+  analysis   ProcedureStep
+  filling    ProcedureStep
+  storage    ProcedureStep
+
+  formula   Formula @relation(fields: [formulaId], references: [id])
+  formulaId String  @unique @db.ObjectId
+}
+
+type ProcedureStep {
+  workInstructions String
+}
+
+model Component {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  percentage Float
+
+  rawMaterial   RawMaterial @relation(fields: [rawMaterialId], references: [id], onDelete: Cascade)
+  rawMaterialId String      @db.ObjectId
+
+  formula   Formula? @relation(fields: [formulaId], references: [id], onDelete: Cascade)
+  formulaId String?  @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Step {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  stepName    String
+  startedAt   DateTime
+  endedAt     DateTime
+  elapsedTime Float
+
+  technicalManager User   @relation(fields: [userId], references: [id], onDelete: Restrict)
+  userId           String @db.ObjectId
+
+  formula   Formula @relation(fields: [formulaId], references: [id])
+  formulaId String  @db.ObjectId
+
+  productionOrder   ProductionOrder @relation(fields: [productionOrderId], references: [id])
+  productionOrderId String          @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Analysis {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  criterion String
+
+  formulas    Formula[] @relation(fields: [formulasIds], references: [id])
+  formulasIds String[]  @db.ObjectId
+
+  productionOrders    ProductionOrder[] @relation(fields: [productionOrdersIds], references: [id])
+  productionOrdersIds String[]          @db.ObjectId
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String  @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// PRODUCTION MODEL - PRODUCTION ORDER
+type TechnicalManager {
+  userId String
+  step   String
+}
+
+type UsedStock {
+  stockId  String
+  quantity Float
+  cost     Float
+}
+
+model ProductionOrder {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  quantity Float
+  batch    String
+  cost     Float
+
+  steps       Step[]
+  composition Composition[]
+
+  analysis    Analysis[] @relation(fields: [analysisIds], references: [id])
+  analysisIds String[]   @db.ObjectId
+
+  formula   Formula @relation(fields: [formulaId], references: [id], onDelete: Restrict)
+  formulaId String  @db.ObjectId
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String  @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Composition {
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  quantity   Float
+  cost       Float
+  usedStocks UsedStock[]
+
+  stocks    Stock[]  @relation(fields: [stocksIds], references: [id])
+  stocksIds String[] @db.ObjectId
+
+  rawMaterial   RawMaterial @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
+  rawMaterialId String      @db.ObjectId
+
+  productionOrder   ProductionOrder @relation(fields: [productionOrderId], references: [id], onDelete: Restrict)
+  productionOrderId String          @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

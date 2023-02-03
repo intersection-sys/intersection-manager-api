@@ -51,7 +51,7 @@ export class RawmaterialController {
               select: {
                 id: true,
                 quantity: true,
-                unitCost: true,
+                cost: true,
                 batch: true,
                 supplier: true,
                 expirationDate: true,
@@ -72,12 +72,15 @@ export class RawmaterialController {
         id: true,
         name: true,
         unit: true,
+        quantity: true,
         stocks: Boolean(stock)
           ? {
               select: {
                 id: true,
                 batch: true,
                 quantity: true,
+                used: true,
+                remaining: true,
                 supplier: true,
                 expirationDate: true,
               },

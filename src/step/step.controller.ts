@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  BadRequestException,
+} from '@nestjs/common';
 import { StepService } from './step.service';
 import { CreateStepDto } from './dto/create-step.dto';
 import { UpdateStepDto } from './dto/update-step.dto';
@@ -8,7 +17,7 @@ export class StepController {
   constructor(private readonly stepService: StepService) {}
 
   @Post()
-  create(@Body() body: CreateStepDto) {
+  async create(@Body() body: CreateStepDto) {
     const schema = CreateStepDto.prototype.generateYupSchema();
     try {
       await schema.validate(body);
@@ -27,16 +36,16 @@ export class StepController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.stepService.findOne(+id);
+    return this.stepService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateStepDto: UpdateStepDto) {
-    return this.stepService.update(+id, updateStepDto);
+    return this.stepService.update(id, updateStepDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.stepService.remove(+id);
+    return this.stepService.remove(id);
   }
 }

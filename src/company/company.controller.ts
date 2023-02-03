@@ -29,7 +29,7 @@ export class CompanyController {
     }
 
     const data = CreateCompanyDto.prototype.formatBody(createCompanyDto);
-    return this.companyService.create(data);
+    return this.companyService.create(data, createCompanyDto.password);
   }
 
   @Roles(Role.DEV)

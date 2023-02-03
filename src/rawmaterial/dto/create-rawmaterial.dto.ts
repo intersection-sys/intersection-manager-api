@@ -4,15 +4,17 @@ export class CreateRawMaterialDto {
   name: string;
   unit: string;
   companyId: string;
+  stockLimit: number;
 
   formatBody(
     body: Omit<CreateRawMaterialDto, 'formatBody' | 'generateYupSchema'>,
   ): Prisma.RawMaterialCreateInput {
-    const { name, unit, companyId } = body;
+    const { name, unit, companyId, stockLimit } = body;
 
     return {
       name,
       unit,
+      stockLimit: stockLimit || -1,
       company: {
         connect: {
           id: companyId,
@@ -26,6 +28,7 @@ export class CreateRawMaterialDto {
       name: yup.string().required(),
       unit: yup.string().required(),
       companyId: yup.string().required(),
+      stockLimit: yup.number(),
     });
   }
 }

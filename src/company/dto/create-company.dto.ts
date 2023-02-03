@@ -11,13 +11,12 @@ export class CreateCompanyDto {
   formatBody(
     body: Omit<CreateCompanyDto, 'formatBody' | 'generateYupSchema'>,
   ): Prisma.CompanyCreateInput {
-    const { name, CNPJ, key, password, additionalInfo } = body;
+    const { name, CNPJ, key, additionalInfo } = body;
 
     return {
       name,
       CNPJ,
       key,
-      password,
       additionalInfo,
     };
   }

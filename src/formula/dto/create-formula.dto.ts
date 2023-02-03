@@ -1,5 +1,10 @@
 import { Prisma } from '@prisma/client';
 import * as yup from 'yup';
+
+type ProcedureStep = {
+  workInstructions: string;
+};
+
 export class CreateFormulaDto {
   name: string;
   shelfLife: number;
@@ -7,26 +12,37 @@ export class CreateFormulaDto {
     percentage: number;
     rawMaterialId: string;
   }[];
-  steps: {
-    name: string;
-    workInstructions: string;
-    order: number;
-  }[];
+  procedure: {
+    weighing: ProcedureStep;
+    production: ProcedureStep;
+    analysis: ProcedureStep;
+    filling: ProcedureStep;
+    storage: ProcedureStep;
+  };
   companyId: string;
 
   formatBody(
     body: Omit<CreateFormulaDto, 'formatBody' | 'generateYupSchema'>,
   ): Prisma.FormulaCreateInput {
-    const { name, steps, components, shelfLife, companyId } = body;
+    const { name, components, shelfLife, companyId, procedure } = body;
+
+    const mappedComponents = components.map((component) => ({
+      percentage: component.percentage,
+      rawMaterial: {
+        connect: {
+          id: component.rawMaterialId,
+        },
+      },
+    }));
 
     return {
       name,
       shelfLife,
-      steps: {
-        create: steps,
-      },
       components: {
-        create: components,
+        create: mappedComponents,
+      },
+      procedure: {
+        create: procedure,
       },
       company: {
         connect: {
@@ -38,13 +54,34 @@ export class CreateFormulaDto {
 
   generateYupSchema() {
     return yup.object().shape({
-      quantity: yup.number().required(),
-      unitCost: yup.number().required(),
-      batch: yup.string().required(),
-      supplier: yup.string().required(),
-      expirationDate: yup.string().required(),
-      rawMaterialId: yup.string().required(),
+      name: yup.string().required(),
+      shelfLife: yup.number().required(),
       companyId: yup.string().required(),
+      components: yup
+        .array(
+          yup.object().shape({
+            percentage: yup.number().required(),
+            rawMaterialId: yup.string().required(),
+          }),
+        )
+        .required(),
+      procedure: yup.object().shape({
+        weighing: yup.object().shape({
+          workInstructions: yup.string().required(),
+        }),
+        production: yup.object().shape({
+          workInstructions: yup.string().required(),
+        }),
+        analysis: yup.object().shape({
+          workInstructions: yup.string().required(),
+        }),
+        filling: yup.object().shape({
+          workInstructions: yup.string().required(),
+        }),
+        storage: yup.object().shape({
+          workInstructions: yup.string().required(),
+        }),
+      }),
     });
   }
 }

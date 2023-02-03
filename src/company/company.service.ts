@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { hashSync } from 'bcrypt';
 import { PrismaService } from '../prisma.service';
+import { hashSync } from 'bcryptjs';
 
 @Injectable()
 export class CompanyService {
   constructor(private prisma: PrismaService) {}
 
-  create(data: Prisma.CompanyCreateInput) {
+  create(data: Prisma.CompanyCreateInput, password: string) {
     return this.prisma.company.create({
       data: {
         ...data,
@@ -17,10 +17,10 @@ export class CompanyService {
             access: ['admin'],
             users: {
               create: {
-                name: data.name,
+                name: data.name + ' Admin',
                 username: 'admin',
-                password: hashSync(data.password, 8),
                 accessKey: '1234',
+                password: hashSync(password, 8),
                 company: {
                   connect: {
                     CNPJ: data.CNPJ,

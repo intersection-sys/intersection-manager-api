@@ -1,23 +1,45 @@
 import { Prisma } from '@prisma/client';
 import * as yup from 'yup';
 export class CreateStepDto {
-  name: string;
-  workInstructions: string;
-  order: number;
+  stepName: string;
+  startedAt: string | Date;
+  endedAt: string | Date;
+  elapsedTime: number;
+  userId: string;
   formulaId: string;
+  productionOrderId: string;
 
   formatBody(
     body: Omit<CreateStepDto, 'formatBody' | 'generateYupSchema'>,
   ): Prisma.StepCreateInput {
-    const { name, workInstructions, order, formulaId } = body;
+    const {
+      stepName,
+      startedAt,
+      endedAt,
+      elapsedTime,
+      userId,
+      formulaId,
+      productionOrderId,
+    } = body;
 
     return {
-      name,
-      workInstructions,
-      order,
+      stepName,
+      startedAt,
+      endedAt,
+      elapsedTime,
       formula: {
         connect: {
           id: formulaId,
+        },
+      },
+      productionOrder: {
+        connect: {
+          id: productionOrderId,
+        },
+      },
+      technicalManager: {
+        connect: {
+          id: userId,
         },
       },
     };
@@ -25,10 +47,24 @@ export class CreateStepDto {
 
   generateYupSchema() {
     return yup.object().shape({
-      name: yup.number().required(),
-      workInstructions: yup.number().required(),
-      order: yup.number().required(),
+      stepName: yup.number().required(),
+      startedAt: yup.string().required(),
+      endedAt: yup.string().required(),
+      elapsedTime: yup.string().required(),
+      userId: yup.string().required(),
       formulaId: yup.string().required(),
+      productionOrderId: yup.string().required(),
     });
   }
 }
+
+/**?
+   stepName: string;
+  startedAt: string | Date;
+  endedAt: string | Date;
+  elapsedTime: number;
+  userId: string;
+  formulaId: string;
+  productionOrderId: string;
+
+ */

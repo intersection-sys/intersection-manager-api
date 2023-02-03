@@ -18,6 +18,7 @@ import { RolesGuard } from './roles.guard';
 import { PrismaService } from './prisma.service';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { StockdestinyModule } from './stockdestiny/stockdestiny.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { JwtModule } from '@nestjs/jwt';
         expiresIn: '7d',
       },
     }),
+    StockdestinyModule,
   ],
   controllers: [AppController],
   providers: [

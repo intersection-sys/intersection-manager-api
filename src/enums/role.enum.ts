@@ -2,6 +2,7 @@ export enum Role {
   DEV = 'DEV',
   Admin = 'admin',
   RawMaterial = 'raw_material',
+  Stock = 'stock',
   Formula = 'formula',
   ProductionOrder = 'production_order',
   User = 'user',
@@ -12,6 +13,11 @@ export enum Role {
   CreateProductionOrder = 'create_production_order',
   UpdateProductionOrder = 'update_production_order',
   DeleteProductionOrder = 'delete_production_order',
+
+  ViewStock = 'view_stock',
+  CreateStock = 'create_stock',
+  UpdateStock = 'update_stock',
+  DeleteStock = 'delete_stock',
 
   ViewRawMaterial = 'view_raw_material',
   CreateRawMaterial = 'create_raw_material',

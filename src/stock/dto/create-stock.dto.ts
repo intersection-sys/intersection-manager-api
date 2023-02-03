@@ -2,30 +2,35 @@ import { Prisma } from '@prisma/client';
 import * as yup from 'yup';
 export class CreateStockDto {
   quantity: number;
-  unitCost: number;
+  cost: number;
   batch: string;
   supplier: string;
   expirationDate: Date | string;
   rawMaterialId: string;
   companyId: string;
+  invoiceNumber: string;
 
   formatBody(
     body: Omit<CreateStockDto, 'formatBody' | 'generateYupSchema'>,
   ): Prisma.StockCreateInput {
     const {
       quantity,
-      unitCost,
+      cost,
       batch,
       supplier,
       expirationDate,
       rawMaterialId,
       companyId,
+      invoiceNumber,
     } = body;
 
     return {
       quantity,
-      unitCost,
+      used: 0,
+      remaining: quantity,
+      cost,
       batch,
+      invoiceNumber,
       supplier,
       expirationDate,
       rawMaterial: {
@@ -44,8 +49,9 @@ export class CreateStockDto {
   generateYupSchema() {
     return yup.object().shape({
       quantity: yup.number().required(),
-      unitCost: yup.number().required(),
+      cost: yup.number().required(),
       batch: yup.string().required(),
+      invoiceNumber: yup.string().required(),
       supplier: yup.string().required(),
       expirationDate: yup.string().required(),
       rawMaterialId: yup.string().required(),

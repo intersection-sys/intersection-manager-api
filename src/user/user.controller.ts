@@ -66,6 +66,7 @@ export class UserController {
         accessKey: true,
         imageUrl: true,
         additionalInfo: true,
+        companyId: true,
         role: Boolean(role)
           ? { select: { id: true, name: true, access: true } }
           : false,
