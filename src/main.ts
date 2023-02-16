@@ -25,8 +25,8 @@ async function bootstrap() {
   app.use(helmet());
 
   const config = new DocumentBuilder()
-    .setTitle('Production Control API')
-    .setDescription('Production Control API Usage')
+    .setTitle('Intersection Manager API')
+    .setDescription('Intersection Manager API Usage')
     .setVersion('0.1.0')
     .addTag('Companies')
     .addTag('Roles')
