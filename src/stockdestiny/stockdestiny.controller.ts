@@ -31,8 +31,13 @@ export class StockdestinyController {
   }
 
   @Get()
-  findAll() {
-    return this.stockdestinyService.findAll();
+  findAll(@Query('stockid') stockId: string) {
+    if (!stockId) throw new BadRequestException('Invalid raw material');
+    return this.stockdestinyService.findAll({
+      where: {
+        stockId,
+      },
+    });
   }
 
   @Get(':id')

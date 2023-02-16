@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, QualityTest } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { S3Service } from 'src/s3.service';
 
@@ -23,7 +23,7 @@ export class StockService {
         files.push({ url: Location, fileName: file.filename });
       });
 
-      data.qualityTests = files;
+      data.qualityTests = { create: files };
     }
 
     await this.prisma.rawMaterial.update({
@@ -60,11 +60,7 @@ export class StockService {
     });
   }
 
-  async update(
-    id: string,
-    data: Prisma.StockUpdateInput,
-    qualityTests?: Express.Multer.File[],
-  ) {
+  async update(id: string, data: Prisma.StockUpdateInput) {
     const stock = await this.prisma.stock.findUnique({ where: { id } });
 
     if (data.quantity) {
@@ -80,40 +76,52 @@ export class StockService {
       });
     }
 
-    if (qualityTests && qualityTests.length > 0) {
-      const UploadFiles = async () => {
-        const files: QualityTest[] = [];
-
-        for (const file of qualityTests) {
-          const { Location } = await this.s3Service.uploadFile(
-            file,
-            `${stock.rawMaterialId}/${stock.supplier}/`,
-          );
-
-          console.log(Location, 'loc');
-          files.push({ url: Location, fileName: file.originalname });
-        }
-
-        return files;
-      };
-
-      const files = await UploadFiles();
-      data.qualityTests = files;
-    }
-
-    const qualityTestsUpdated: QualityTest[] = qualityTests
-      ? [...stock.qualityTests, ...(data.qualityTests as QualityTest[])]
-      : stock.qualityTests;
-
-    console.log(data.qualityTests, qualityTestsUpdated, 'asd');
-
     return this.prisma.stock.update({
       where: {
         id,
       },
       data: {
         ...data,
-        qualityTests: qualityTestsUpdated,
+      },
+    });
+  }
+
+  async uploadQualityTests(
+    data: Partial<Prisma.QualityTestCreateInput>,
+    qualityTests: Express.Multer.File[],
+  ) {
+    const uploadFiles = async () => {
+      const files = [];
+
+      for await (const file of qualityTests) {
+        const { Location } = await this.s3Service.uploadFile(
+          file,
+          `${data.stock.connect.id}/`,
+        );
+
+        files.push({ url: Location, fileName: file.originalname });
+      }
+
+      return files;
+    };
+
+    const uploadedFiles = await uploadFiles();
+
+    const createInput = uploadedFiles.map((file) => ({
+      stockId: data.stock.connect.id,
+      fileName: file.fileName,
+      url: file.url,
+    }));
+
+    return this.prisma.qualityTest.createMany({
+      data: createInput,
+    });
+  }
+
+  async deleteQualityTests(ids: string[]) {
+    return this.prisma.qualityTest.deleteMany({
+      where: {
+        id: { in: ids },
       },
     });
   }

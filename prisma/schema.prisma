@@ -110,9 +110,16 @@ model Stock {
   updatedAt DateTime @updatedAt
 }
 
-type QualityTest {
+model QualityTest {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
   url      String
   fileName String
+  stock    Stock?  @relation(fields: [stockId], references: [id])
+  stockId  String? @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model StockDestiny {

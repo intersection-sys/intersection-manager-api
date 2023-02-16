@@ -6,8 +6,8 @@ export class CreateStockDestinyDto {
   description: string;
   stockId: string;
   rawMaterialId: string;
-  productionOrderId?: string;
   wasted?: boolean;
+  productionOrderId?: string;
 
   formatBody(
     body: Omit<CreateStockDestinyDto, 'formatBody' | 'generateYupSchema'>,

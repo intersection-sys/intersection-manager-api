@@ -40,8 +40,8 @@ export class StockDestinyService {
   }
 
   findAll(params?: {
-    where: Prisma.StockWhereInput;
-    select?: Prisma.StockSelect;
+    where: Prisma.StockDestinyWhereInput;
+    select?: Prisma.StockDestinySelect;
   }) {
     return this.prisma.stockDestiny.findMany({
       where: params.where,
@@ -59,7 +59,7 @@ export class StockDestinyService {
     });
   }
 
-  async update(id: string, data: Prisma.StockUpdateInput) {
+  async update(id: string, data: Prisma.StockDestinyUpdateInput) {
     if (data.quantity) {
       const stockDestiny = await this.prisma.stockDestiny.findUnique({
         where: { id },
@@ -84,7 +84,7 @@ export class StockDestinyService {
           },
           data: {
             used: {
-              decrement: stockDestiny.quantity + Number(data.quantity),
+              increment: Number(data.quantity) - stockDestiny.quantity,
             },
             remaining: {
               increment: stockDestiny.quantity - Number(data.quantity),

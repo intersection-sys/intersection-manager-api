@@ -94,19 +94,33 @@ export class StockController {
   }
 
   @Roles(Role.Admin, Role.RawMaterial, Role.Stock, Role.UpdateStock)
-  @UseInterceptors(FilesInterceptor('qualityTests'))
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateStockDto: UpdateStockDto,
-    @UploadedFiles() qualityTests?: Express.Multer.File[],
-  ) {
-    return this.stockService.update(id, updateStockDto, qualityTests);
+  update(@Param('id') id: string, @Body() updateStockDto: UpdateStockDto) {
+    return this.stockService.update(id, updateStockDto);
   }
 
   @Roles(Role.Admin, Role.RawMaterial, Role.Stock, Role.DeleteStock)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.stockService.remove(id);
+  }
+
+  @Roles(Role.Admin, Role.RawMaterial, Role.Stock, Role.DeleteStock)
+  @Delete('/qualitytest/:id')
+  removeQualityTest(@Param('id') id: string) {
+    return this.stockService.deleteQualityTests([id]);
+  }
+
+  @Roles(Role.Admin, Role.RawMaterial, Role.Stock, Role.DeleteStock)
+  @Post('qualitytest/:id')
+  @UseInterceptors(FilesInterceptor('qualityTestFiles'))
+  uploadQualityTest(
+    @Param('id') id: string,
+    @UploadedFiles() qualityTestFiles?: Express.Multer.File[],
+  ) {
+    return this.stockService.uploadQualityTests(
+      { stock: { connect: { id } } },
+      qualityTestFiles,
+    );
   }
 }

@@ -46,6 +46,7 @@ export class RawmaterialController {
         name: true,
         unit: true,
         quantity: true,
+        stockLimit: true,
         stocks: Boolean(stocks)
           ? {
               select: {
