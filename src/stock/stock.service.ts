@@ -60,6 +60,33 @@ export class StockService {
     });
   }
 
+  searchStock(query: string) {
+    return this.prisma.stock.findMany({
+      where: {
+        OR: [
+          {
+            batch: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+          {
+            invoiceNumber: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+          {
+            supplier: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+    });
+  }
+
   async update(id: string, data: Prisma.StockUpdateInput) {
     const stock = await this.prisma.stock.findUnique({ where: { id } });
 

@@ -35,6 +35,17 @@ export class RawmaterialService {
     });
   }
 
+  searchRawMaterial(query: string) {
+    return this.prisma.rawMaterial.findMany({
+      where: {
+        name: {
+          contains: query,
+          mode: 'insensitive',
+        },
+      },
+    });
+  }
+
   update(id: string, data: Prisma.RawMaterialUpdateInput) {
     return this.prisma.rawMaterial.update({
       where: {

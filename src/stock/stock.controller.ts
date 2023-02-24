@@ -93,6 +93,12 @@ export class StockController {
     });
   }
 
+  @Roles(Role.Admin, Role.Stock, Role.ViewStock)
+  @Get('search/:query')
+  search(@Param('query') query: string) {
+    return this.stockService.searchStock(query);
+  }
+
   @Roles(Role.Admin, Role.RawMaterial, Role.Stock, Role.UpdateStock)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateStockDto: UpdateStockDto) {

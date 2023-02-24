@@ -91,6 +91,12 @@ export class RawmaterialController {
     });
   }
 
+  @Roles(Role.Admin, Role.RawMaterial, Role.ViewRawMaterial)
+  @Get('search/:query')
+  search(@Param('query') query: string) {
+    return this.rawmaterialService.searchRawMaterial(query);
+  }
+
   @Roles(Role.Admin, Role.RawMaterial, Role.UpdateRawMaterial)
   @Patch(':id')
   update(
