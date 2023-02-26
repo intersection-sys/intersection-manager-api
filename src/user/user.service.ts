@@ -63,6 +63,27 @@ export class UserService {
     });
   }
 
+  searchUser(query: string) {
+    return this.prisma.user.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+          {
+            username: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+    });
+  }
+
   update(id: string, data: Prisma.UserUpdateInput) {
     return this.prisma.user.update({
       where: {

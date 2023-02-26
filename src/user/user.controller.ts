@@ -74,6 +74,12 @@ export class UserController {
     });
   }
 
+  @Roles(Role.Admin, Role.Stock, Role.ViewStock)
+  @Get('search/:query')
+  search(@Param('query') query: string) {
+    return this.userService.searchUser(query);
+  }
+
   @Roles(Role.Admin, Role.User, Role.UpdateUser)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
